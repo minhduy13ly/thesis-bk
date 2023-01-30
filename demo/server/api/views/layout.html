@@ -1,0 +1,59 @@
+{% load static %}
+<!DOCTYPE html>
+<!-- prettier-ignore -->
+<html class="insetting">
+	<head>
+		<meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+		
+         <!-- GOOGLE WEB FONT -->
+        <link href="https://fonts.googleapis.com/css?family=Work+Sans:400,500,600" rel="stylesheet">
+
+        <!-- BASE CSS -->
+        <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+        <link href="{% static 'css/menu.css' %}" rel="stylesheet">
+        <link href="{% static 'css/style.css' %}" rel="stylesheet">
+        <link href="{% static 'css/vendors.css' %}" rel="stylesheet">
+
+        <!-- YOUR CUSTOM CSS -->
+        <link href="{% static 'css/custom.css' %}" rel="stylesheet">
+
+		{% block styles %}
+
+		{% endblock %}
+
+	</head>
+	
+	<body>
+		{% block content %}
+
+		{% endblock %}
+
+        {% csrf_token %}
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <script>
+            // using jQuery
+            var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
+   
+           function csrfSafeMethod(method) {
+               // these HTTP methods do not require CSRF protection
+               return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+           }
+           $.ajaxSetup({
+               beforeSend: function(xhr, settings) {
+                   if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                       xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                   }
+               }
+           });
+           
+       </script>
+
+		{% block scripts %}
+
+		{% endblock %}
+
+	</body>
+</html>

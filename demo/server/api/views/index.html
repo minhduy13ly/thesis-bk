@@ -1,0 +1,152 @@
+{% extends "layout.html" %}
+{% load static %}
+
+{% block styles %}
+
+<link href="{% static 'css/drop_and_upload.css' %}" rel="stylesheet">
+<link href="{% static 'css/preload.css' %}" rel="stylesheet">
+
+{% endblock %}
+
+{% block content %}
+	
+	<div id="preloader">
+		<svg class="loading" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="700px" height="190px" viewBox="0 0 700 120" enable-background="new 0 0 700 120" xml:space="preserve">
+		<defs>
+			<pattern id="water" width=".25" height="1.1" patternContentUnits="objectBoundingBox">
+			<path fill="#fff" d="M0.25,1H0c0,0,0-0.659,0-0.916c0.083-0.303,0.158,0.334,0.25,0C0.25,0.327,0.25,1,0.25,1z" />
+			</pattern>
+
+			<text id="text" transform="matrix(1 0 0 1 -8.0684 116.7852)" font-size="161.047">LOADING</text>
+
+			<mask id="text_mask">
+			<use x="0" y="0" xlink:href="#text" opacity="1" fill="#3498db" />
+			</mask>
+		</defs>
+
+		<use x="0" y="0" xlink:href="#text" fill="#3498db" />
+
+		<rect class="water-fill" mask="url(#text_mask)" fill="url(#water)" x="-400" y="0" width="1600" height="120" />
+		</svg>
+	</div>	
+
+	<nav>
+		<ul class="cd-primary-nav">
+			<li><a href="javascript:void(0)" class="animated_link">In Construction</a></li>
+		</ul>
+	</nav>
+	<!-- /menu -->
+	
+	<div class="container-fluid">
+	    <div class="row row-height">
+	        <div class="col-xl-4 col-lg-4 content-left">
+	            <div class="content-left-wrapper">
+	                <div>
+	                    <figure><img src="{% static 'img/info_graphic_1.svg' %}" alt="" class="img-fluid" width="270" height="270"></figure>
+	                    <h2>Super Resolution</h2>
+	                </div>
+	            </div>
+	            <!-- /content-left-wrapper -->
+	        </div>
+	        <!-- /content-left -->
+			<div class="col-xl-8 col-lg-8 content-right" style="background: #6E95F7;" id="start">
+	            <form id="imageUploadForm" class="imageUploadForm">
+					<span class="helpText" id="helpText"></span>
+					<input type='file' id="file" class="uploadButton" accept="image/*" />
+					<div id="uploadedImg" class="uploadedImg">
+					  <span class="unveil"></span>
+					</div>
+				</form>
+	            <!-- /Wizard container -->
+	        </div>
+	        <!-- /content-right-->
+	    </div>
+	    <!-- /row-->
+	</div>
+	<!-- /container-fluid -->
+
+	<div class="cd-overlay-nav">
+		<span></span>
+	</div>
+	<!-- /cd-overlay-nav -->
+
+	<div class="cd-overlay-content">
+		<span></span>
+	</div>
+	<!-- /cd-overlay-content -->
+	
+{% endblock %}
+
+{% block scripts %}
+
+	<!-- COMMON SCRIPTS -->
+	<script src="https://unpkg.com/eva-icons"></script>
+    <script src="{% static 'js/common_scripts.min.js' %}"></script>
+	<script src="{% static 'js/velocity.min.js' %}"></script>
+	<script src="{% static 'js/common_functions.js' %}"></script>
+	<script>
+
+		var imageFile = ''
+
+		function readURL(input) {
+			if (input.files && input.files[0]) {
+			var reader = new FileReader();
+		
+			reader.onload = function (e) {
+					$uploadedImg[0].style.backgroundImage='url('+e.target.result+')';
+			};
+
+			imageFile = input.files[0];
+		
+			reader.readAsDataURL(input.files[0]);
+
+			}
+
+		}
+		
+		var $form = $("#imageUploadForm"), 
+			$file = $("#file"), 
+			$uploadedImg = $("#uploadedImg"), 
+			$helpText = $("#helpText")
+		;
+		$file.on('change', function(){
+			readURL(this);
+			$form.addClass('loading');
+		});
+		$uploadedImg.on('webkitAnimationEnd MSAnimationEnd oAnimationEnd animationend', function(){
+			$form.addClass('loaded');
+
+			var fd = new FormData();
+			fd.append('image',imageFile);
+
+			$('#preloader').fadeIn();
+
+			$.ajax({
+				type: 'POST',
+				url: "{% url 'upload' %}",
+				data: fd,
+				contentType: false,
+				processData: false,
+				success: function (response) {
+					let a= document.createElement('a');
+					a.target= '_blank';
+					a.href= 'result';
+					a.click();
+					$('#preloader').fadeOut();
+				},
+				error: (xhr) => {
+					$('#preloader').fadeOut();
+					console.log(xhr.statusText + ":" + xhr.responseJSON.message);
+				},
+			});
+
+		});
+		$helpText.on('webkitAnimationEnd MSAnimationEnd oAnimationEnd animationend', function(){
+			setTimeout(function() {
+				$file.val('');  $form.removeClass('loading').removeClass('loaded');
+
+			}, 1000);
+		});
+	</script>
+
+{% endblock %}
